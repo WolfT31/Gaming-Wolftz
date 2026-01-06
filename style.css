@@ -1,0 +1,2056 @@
+/* =======GLOBAL RESET & BASE STYLES====== */
+
+/* Reset all elements to remove default margins, padding, and border-box */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Include padding and border in element's total width/height */
+  font-family: Arial, sans-serif; /* Default font for entire site */
+}
+
+/* Main body styling - sets the overall theme background and text color */
+body {
+  background: #0b0f1a; /* Dark blue-black background for cyberpunk theme */
+  color: white; /* White text for contrast */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* ==========================================================================
+   LOGO ANIMATIONS
+   ========================================================================== */
+
+/* Logo styling with glow animation */
+.logo {
+  width: 120px;
+  border-radius: 50%; /* Makes logo circular */
+  position: relative;
+  z-index: 5; /* Ensures logo stays above other elements */
+  animation: logoGlow 3s ease-in-out infinite; /* Continuous glow animation */
+  cursor: pointer; /* Shows hand cursor on hover */
+}
+
+/* Keyframes for logo's neon glow animation - cycles between two glow states */
+@keyframes logoGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 10px #00f2ff, /* Cyan outer glow */
+      0 0 20px #00f2ff, /* Cyan middle glow */
+      0 0 20px #ff4fd8; /* Pink inner glow */
+  }
+  50% {
+    box-shadow:
+      0 0 20px #00f2ff, /* Stronger cyan glow */
+      0 0 20px #ff4fd8, /* Pink middle glow */
+      0 0 20px #ff4fd8; /* Pink inner glow */
+  }
+}
+
+/* Enhanced glow when logo is active (touched/clicked) */
+.logo.active {
+  animation: none; /* Stop the pulsing animation */
+  box-shadow:
+    0 0 20px #00f2ff,
+    0 0 25px #00f2ff,
+    0 0 25px #ff4fd8; /* Static but stronger glow */
+}
+
+/* ==========================================================================
+   HEADER TEXT STYLING
+   ========================================================================== */
+
+/* Gradient text effect for header spans */
+h1 span {
+  background: linear-gradient(45deg, #00f2ff, #9d4edd, #ff4fd8); /* Cyan-purple-pink gradient */
+  -webkit-background-clip: text; /* Clip background to text shape (WebKit browsers) */
+  -webkit-text-fill-color: transparent; /* Make text color transparent to show gradient */
+  background-clip: text; /* Standard property for other browsers */
+  text-shadow: none;
+  transition: text-shadow 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for header text - adds glow */
+h1 span:hover {
+  text-shadow: 
+    0 0 10px rgba(0, 242, 255, 0.5), /* Cyan glow */
+    0 0 20px rgba(157, 78, 221, 0.3); /* Purple glow */
+}
+
+/* ==========================================================================
+   BUTTON ANIMATIONS
+   ========================================================================== */
+
+/* Styling for most buttons except specific excluded classes */
+button:not(.access-btn):not(.logout-btn):not(.prev):not(.next):not(.tabs button):not(.close-modal) {
+  margin-top: 30px;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 30px; /* Rounded pill shape */
+  background: linear-gradient(45deg, #00f2ff, #ff4fd8); /* Cyan to pink gradient */
+  color: black; /* Dark text for contrast on light gradient */
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden; /* Hides pseudo-element overflow */
+  transition: all 0.3s ease; /* Smooth transitions for all properties */
+}
+
+/* Shimmer effect overlay for buttons */
+button:not(.access-btn):not(.logout-btn):not(.prev):not(.next):not(.tabs button):not(.close-modal)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%; /* Start off-screen left */
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.7s;
+}
+
+/* Move shimmer across button on hover */
+button:not(.access-btn):not(.logout-btn):not(.prev):not(.next):not(.tabs button):not(.close-modal):hover::before {
+  left: 100%; /* Move to off-screen right */
+}
+
+/* Button hover effects */
+button:not(.access-btn):not(.logout-btn):not(.prev):not(.next):not(.tabs button):not(.close-modal):hover {
+  transform: translateY(-3px); /* Lift effect */
+  box-shadow: 
+    0 0 15px #00f2ff, /* Cyan glow */
+    0 0 25px #ff4fd8, /* Pink glow */
+    0 5px 15px rgba(0, 0, 0, 0.3); /* Drop shadow for depth */
+}
+
+/* ==========================================================================
+   SLIDER/CAROUSEL STYLING
+   ========================================================================== */
+
+.slider {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  margin-top: 20px;
+  overflow: hidden; /* Hides slides outside container */
+  border-radius: 20px;
+  box-shadow: 
+    0 0 20px rgba(0, 242, 255, 0.3), /* Outer cyan glow */
+    0 0 40px rgba(255, 79, 216, 0.2), /* Outer pink glow */
+    inset 0 0 20px rgba(0, 242, 255, 0.1); /* Inner cyan glow */
+  border: 1px solid rgba(0, 242, 255, 0.2); /* Semi-transparent border */
+}
+
+/* ==========================================================================
+   GAME CARD STYLING WITH OUTLINE/STROKE EFFECT
+   ========================================================================== */
+
+.card {
+  background: #12172a; /* Dark blue background */
+  border-radius: 15px;
+  overflow: hidden; /* Clips child elements to border radius */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  
+  /* Multi-layered outline using box-shadow */
+  border: 2px solid transparent; /* Transparent border for outline effect */
+  box-shadow: 
+    0 0 0 1px rgba(0, 242, 255, 0.3), /* Inner cyan outline */
+    0 0 0 3px rgba(255, 79, 216, 0.1), /* Middle pink outline */
+    0 5px 20px rgba(0, 0, 0, 0.4); /* Drop shadow */
+}
+
+/* Card hover effects */
+.card:hover {
+  transform: translateY(-5px) scale(1.02); /* Lift and slight zoom */
+  
+  /* Enhanced outline on hover */
+  box-shadow: 
+    0 0 0 2px #00f2ff, /* Bright cyan border */
+    0 0 0 5px rgba(0, 242, 216, 0.4), /* Cyan glow */
+    0 0 0 8px rgba(255, 79, 216, 0.2), /* Pink glow */
+    0 10px 30px rgba(0, 242, 255, 0.3); /* Strong cyan shadow */
+  
+  border-color: rgba(0, 242, 255, 0.5); /* Semi-transparent cyan border */
+}
+
+/* Corner accent gradient overlay */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 15px;
+  border: 2px solid transparent;
+  background: linear-gradient(45deg, 
+    transparent 45%, 
+    rgba(0, 242, 255, 0.1) 50%, 
+    transparent 55%); /* Diagonal gradient line */
+  background-clip: padding-box; /* Clip gradient to border box */
+  pointer-events: none; /* Allows clicks to pass through */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover::after {
+  opacity: 1; /* Show gradient on hover */
+}
+
+/* Neon corner dot - top left */
+.card::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #00f2ff;
+  border-radius: 50%;
+  top: 8px;
+  left: 8px;
+  opacity: 0;
+  z-index: 2;
+  box-shadow: 0 0 10px #00f2ff;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover::before {
+  opacity: 1;
+  animation: cornerGlow 1.5s infinite alternate; /* Pulsing glow */
+}
+
+@keyframes cornerGlow {
+  0% {
+    box-shadow: 0 0 5px #00f2ff, 0 0 10px #00f2ff;
+  }
+  100% {
+    box-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff, 0 0 30px rgba(255, 79, 216, 0.5);
+  }
+}
+
+/* Additional corner dots (requires HTML elements) */
+.card .corner-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #ff4fd8;
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 2;
+  box-shadow: 0 0 8px #ff4fd8;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .corner-dot {
+  opacity: 0.8; /* Show dots on hover */
+}
+
+/* Positioning for additional corner dots */
+.corner-top-right {
+  top: 8px;
+  right: 8px;
+}
+
+.corner-bottom-left {
+  bottom: 8px;
+  left: 8px;
+}
+
+.corner-bottom-right {
+  bottom: 8px;
+  right: 8px;
+}
+
+/* Card image styling */
+.card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover; /* Crop image to fit container */
+  transition: all 0.3s ease;
+}
+
+.card:hover img {
+  filter: brightness(1.1) saturate(1.2); /* Enhance image on hover */
+}
+
+/* ==========================================================================
+   PRICE CARD GLOW EFFECT
+   ========================================================================== */
+
+.price-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Rotating radial gradient background effect */
+.price-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
+  animation: rotateGlow 10s linear infinite; /* Continuous rotation */
+}
+
+@keyframes rotateGlow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   PULSING ANIMATIONS FOR IMPORTANT ELEMENTS
+   ========================================================================== */
+
+.payment-title {
+  animation: pulse 2s infinite; /* Continuous pulsing text glow */
+}
+
+@keyframes pulse {
+  0% {
+    text-shadow: 0 0 5px #ff4fd8;
+  }
+  50% {
+    text-shadow: 0 0 20px #ff4fd8, 0 0 30px #ff4fd8; /* Stronger glow at midpoint */
+  }
+  100% {
+    text-shadow: 0 0 5px #ff4fd8;
+  }
+}
+
+/* Video button pulsing animation */
+.video-btn {
+  animation: pulseButton 3s infinite;
+}
+
+@keyframes pulseButton {
+  0%, 100% {
+    box-shadow: 0 5px 15px rgba(255, 79, 216, 0.3);
+  }
+  50% {
+    box-shadow: 0 5px 25px rgba(255, 79, 216, 0.6), 0 0 30px rgba(255, 79, 216, 0.4);
+  }
+}
+
+/* ==========================================================================
+   PIN MODAL STYLING
+   ========================================================================== */
+
+.pin-modal {
+  position: fixed; /* Cover entire viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0b0f1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Above most content */
+}
+
+.pin-container {
+  background: #12172a;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  border: 2px solid #00f2ff; /* Cyan border */
+}
+
+.pin-container h2 {
+  color: #00f2ff;
+  margin-bottom: 10px;
+}
+
+.pin-container p {
+  color: #aaa; /* Light gray text */
+  margin-bottom: 20px;
+}
+
+#pinInput {
+  width: 100%;
+  padding: 15px;
+  font-size: 24px;
+  text-align: center;
+  background: #0f1425;
+  border: 2px solid #00f2ff;
+  border-radius: 10px;
+  color: white;
+  margin: 20px 0;
+}
+
+.access-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(45deg, #00f2ff, #ff4fd8);
+  border: none;
+  border-radius: 10px;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+/* ==========================================================================
+   CONTACT BUTTON STYLING
+   ========================================================================== */
+
+.contact-btn {
+  display: block;
+  background: #25D366; /* WhatsApp green */
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  margin: 15px 0;
+}
+
+/* WhatsApp specific button */
+.whatsapp-btn {
+  background: linear-gradient(45deg, #25D366, #128C7E); /* WhatsApp gradient */
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-btn:hover {
+  box-shadow: 0 6px 15px rgba(37, 211, 102, 0.5);
+  background: linear-gradient(45deg, #1da851, #0d7d5f);
+}
+
+/* ==========================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+
+.hidden {
+  display: none !important; /* Force hide elements */
+}
+
+/* ==========================================================================
+   HEADER SECTION
+   ========================================================================== */
+
+.header {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.logo {
+  width: 100px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+h1 span {
+  color: #00f2ff; /* Fallback color for browsers without gradient support */
+}
+
+/* ==========================================================================
+   SLIDER/CAROUSEL COMPONENTS
+   ========================================================================== */
+
+.slider {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  margin: 30px auto;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.slides {
+  display: flex;
+  transition: transform 0.5s; /* Smooth slide transition */
+  height: 100%;
+}
+
+.slides img {
+  min-width: 100%; /* Ensure image covers slide width */
+  height: 100%;
+  object-fit: cover; /* Crop image to fit */
+}
+
+/* Navigation arrows */
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5); /* Semi-transparent black */
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+
+/* ==========================================================================
+   LIBRARY & SEARCH BAR
+   ========================================================================== */
+
+.library {
+  padding: 20px;
+}
+
+/* Sleek search bar with complex outline */
+#search {
+  width: 100%;
+  padding: 12px 20px 12px 45px; /* Extra left padding for icon */
+  border-radius: 25px;
+  border: none;
+  background: rgba(15, 20, 37, 0.8); /* Semi-transparent dark blue */
+  color: white;
+  margin-bottom: 20px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth easing function */
+  position: relative;
+  
+  /* Complex multi-layer outline using box-shadow */
+  box-shadow: 
+    inset 0 1px 3px rgba(255, 255, 255, 0.1), /* Inner top highlight */
+    0 0 0 1px rgba(0, 242, 255, 0.4), /* Inner cyan border */
+    0 0 0 3px rgba(255, 79, 216, 0.2), /* Middle pink border */
+    0 4px 12px rgba(0, 0, 0, 0.4); /* Drop shadow */
+  
+  text-shadow: 0 0 8px rgba(0, 242, 255, 0.3); /* Glowing text */
+  letter-spacing: 0.3px;
+}
+
+/* Search icon using pseudo-element */
+#search::before {
+  content: "🔍";
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  opacity: 0.7;
+  pointer-events: none; /* Allow clicks to pass through to input */
+  transition: all 0.3s ease;
+}
+
+/* Placeholder styling */
+#search::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  transition: opacity 0.3s ease;
+}
+
+/* Search bar focus and hover effects */
+#search:focus, #search:hover {
+  outline: none;
+  background: rgba(15, 20, 37, 0.95); /* Darker background */
+  transform: translateY(-1px); /* Slight lift */
+  padding-left: 48px; /* Shift for icon animation */
+  
+  /* Enhanced outline */
+  box-shadow: 
+    inset 0 1px 4px rgba(255, 255, 255, 0.15), /* Brighter inner highlight */
+    0 0 0 2px #00f2ff, /* Brighter cyan border */
+    0 0 0 4px rgba(0, 242, 255, 0.6), /* Cyan glow */
+    0 0 0 6px rgba(255, 79, 216, 0.3), /* Pink glow */
+    0 6px 18px rgba(0, 242, 255, 0.25); /* Cyan shadow */
+}
+
+/* Animated search icon on focus */
+#search:focus::before {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1); /* Slightly larger */
+  filter: drop-shadow(0 0 6px #00f2ff); /* Glow effect */
+  animation: iconFloat 1.5s infinite alternate ease-in-out; /* Floating animation */
+}
+
+@keyframes iconFloat {
+  0% {
+    transform: translateY(-50%) scale(1.1);
+    filter: drop-shadow(0 0 6px #00f2ff);
+  }
+  100% {
+    transform: translateY(-50%) scale(1.15);
+    filter: drop-shadow(0 0 10px #00f2ff) drop-shadow(0 0 15px rgba(255, 79, 216, 0.5));
+  }
+}
+
+/* Fade placeholder when focused */
+#search:focus::placeholder {
+  opacity: 0.3;
+}
+
+/* Pulsing animation for active search */
+#search:focus {
+  animation: searchPulse 2.5s infinite alternate;
+}
+
+@keyframes searchPulse {
+  0% {
+    box-shadow: 
+      inset 0 1px 4px rgba(255, 255, 255, 0.15),
+      0 0 0 2px #00f2ff,
+      0 0 0 4px rgba(0, 242, 255, 0.6),
+      0 0 0 6px rgba(255, 79, 216, 0.3),
+      0 6px 18px rgba(0, 242, 255, 0.25);
+  }
+  100% {
+    box-shadow: 
+      inset 0 1px 4px rgba(255, 255, 255, 0.2),
+      0 0 0 2px #00f2ff,
+      0 0 0 4px rgba(0, 242, 255, 0.7),
+      0 0 0 6px rgba(255, 79, 216, 0.4),
+      0 6px 20px rgba(255, 79, 216, 0.2);
+  }
+}
+
+/* Custom clear button for WebKit browsers */
+#search::-webkit-search-cancel-button {
+  -webkit-appearance: none; /* Remove default styling */
+  height: 20px;
+  width: 20px;
+  background: linear-gradient(45deg, #ff4fd8, #ff0066);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+#search::-webkit-search-cancel-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 0 8px #ff4fd8;
+}
+
+/* ==========================================================================
+   GAME FILTER TABS
+   ========================================================================== */
+
+/* ================= CYBERPUNK TABS - FORCE FIT IN ONE LINE ================= */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.tabs button {
+  flex: 1; /* Equal width for all buttons */
+  padding: 14px 15px;
+  margin: 0;
+  border: none;
+  border-radius: 30px;
+  background: rgba(18, 23, 42, 0.8);
+  color: #e0e0ff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  white-space: nowrap;
+  min-width: 0; /* Allow shrinking */
+  
+  /* Cyberpunk border effect */
+  border: 2px solid transparent;
+  box-shadow: 
+    0 0 0 1px rgba(0, 242, 255, 0.3),
+    0 0 0 3px rgba(255, 79, 216, 0.1),
+    0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile - adjust font size instead of width */
+@media (max-width: 768px) {
+  .tabs button {
+    padding: 10px 8px;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabs button {
+    padding: 8px 5px;
+    font-size: 10px;
+  }
+}
+
+/* ==========================================================================
+   GAMES GRID LAYOUT
+   ========================================================================== */
+
+.games {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsive grid */
+  gap: 15px;
+}
+
+/* Game card title - forced single line */
+.card h3 {
+  padding: 10px 5px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  height: 36px; /* Fixed height for consistency */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap; /* Prevent line breaks */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Show ... for long text */
+  margin: 0;
+  color: #e0e0ff; /* Light blue text */
+}
+
+/* ==========================================================================
+   GAME DETAILS MODAL
+   ========================================================================== */
+
+.game-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95); /* Near-black overlay */
+  z-index: 2000; /* Above everything */
+  overflow-y: auto; /* Allow scrolling if content is long */
+  padding: 20px;
+}
+
+.modal-content {
+  background: #12172a;
+  max-width: 800px;
+  margin: 50px auto;
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #ff4fd8;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.game-main {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.game-cover {
+  width: 200px;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+.game-info {
+  flex: 1; /* Take remaining space */
+}
+
+.game-info h1 {
+  color: #00f2ff;
+  margin-bottom: 15px;
+}
+
+.game-details {
+  background: #0f1425;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.label {
+  color: #aaa; /* Light gray for labels */
+}
+
+.value {
+  color: white;
+  font-weight: bold;
+}
+
+.action-buttons {
+  margin: 30px 0;
+}
+
+.video-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(45deg, #ff4fd8, #ff0066);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.download-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.download-btn {
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.app-btn {
+  background: #00f2ff;
+  color: black;
+}
+
+.game-btn {
+  background: #ffd700; /* Gold color */
+  color: black;
+}
+
+.requirements {
+  background: #0f1425;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.requirements h3 {
+  color: #ff4fd8;
+  margin-bottom: 15px;
+}
+
+.requirements ul {
+  list-style: none; /* Remove bullet points */
+  padding-left: 20px;
+}
+
+.requirements li {
+  padding: 8px 0;
+  border-bottom: 1px solid #222; /* Separator lines */
+}
+
+/* ==========================================================================
+   ENHANCED CYBERPUNK PARTICLES BACKGROUND
+   ========================================================================== */
+
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Behind all content */
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(0, 242, 255, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255, 79, 216, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 40% 80%, rgba(157, 78, 221, 0.05) 0%, transparent 40%),
+    #0b0f1a; /* Multiple gradient overlays */
+  overflow: hidden;
+}
+
+/* Base particle styling */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none; /* Allow clicks to pass through */
+  opacity: 0.7;
+  filter: blur(0.5px); /* Soft glow effect */
+}
+
+/* Glowing particles variant */
+.particle.glow {
+  opacity: 0.9;
+  filter: blur(1px);
+  animation: particleGlow 3s infinite alternate;
+}
+
+@keyframes particleGlow {
+  0% {
+    opacity: 0.4;
+    box-shadow: 0 0 5px currentColor;
+  }
+  100% {
+    opacity: 0.9;
+    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+/* Grid lines for cyberpunk aesthetic */
+.neon-line {
+  position: absolute;
+  background: transparent;
+  pointer-events: none;
+  opacity: 0.05;
+  animation: linePulse 8s infinite alternate; /* Subtle pulsing */
+}
+
+@keyframes linePulse {
+  0% {
+    opacity: 0.03;
+  }
+  100% {
+    opacity: 0.08;
+  }
+}
+
+/* Horizontal grid line */
+.horizontal-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #00f2ff, transparent); /* Fade in/out */
+  top: 50%;
+}
+
+/* Vertical grid line */
+.vertical-line {
+  height: 100%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, #ff4fd8, transparent);
+  left: 50%;
+}
+
+/* Diagonal moving lines */
+.diagonal-line {
+  position: absolute;
+  width: 200%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(157, 78, 221, 0.3), transparent);
+  opacity: 0.04;
+  transform: rotate(45deg);
+  animation: diagonalMove 20s linear infinite;
+}
+
+.diagonal-line:nth-child(odd) {
+  animation-direction: reverse; /* Alternate directions */
+  background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.3), transparent);
+}
+
+@keyframes diagonalMove {
+  0% {
+    transform: rotate(45deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(45deg) translateX(100%);
+  }
+}
+
+/* Hexagon shapes floating */
+.hexagon {
+  position: absolute;
+  width: 20px;
+  height: 17px;
+  background: rgba(0, 242, 255, 0.1);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); /* Hex shape */
+  opacity: 0.3;
+  animation: hexFloat 15s infinite linear;
+}
+
+.hexagon::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 13px;
+  background: rgba(255, 79, 216, 0.05);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  top: 2px;
+  left: 2px;
+}
+
+@keyframes hexFloat {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Matrix-style binary rain */
+.binary-rain {
+  position: absolute;
+  color: rgba(0, 242, 255, 0.7);
+  font-family: 'Courier New', monospace; /* Terminal font */
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00f2ff;
+  opacity: 0;
+  animation: binaryFall 10s infinite linear;
+}
+
+@keyframes binaryFall {
+  0% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.7;
+  }
+  95% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+/* Circuit board lines */
+.circuit {
+  position: absolute;
+  width: 100px;
+  height: 60px;
+  border: 1px solid rgba(255, 79, 216, 0.2);
+  border-radius: 10px;
+  opacity: 0.1;
+  animation: circuitPulse 4s infinite alternate;
+}
+
+.circuit::before, .circuit::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: rgba(0, 242, 255, 0.3);
+  border-radius: 50%;
+}
+
+.circuit::before {
+  top: -5px;
+  left: -5px;
+}
+
+.circuit::after {
+  bottom: -5px;
+  right: -5px;
+}
+
+@keyframes circuitPulse {
+  0% {
+    opacity: 0.05;
+    border-color: rgba(255, 79, 216, 0.1);
+  }
+  100% {
+    opacity: 0.15;
+    border-color: rgba(0, 242, 255, 0.3);
+  }
+}
+
+/* CRT monitor scan lines effect */
+.scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 242, 255, 0.03) 51%,
+    transparent 52%
+  );
+  background-size: 100% 4px; /* Line spacing */
+  opacity: 0.3;
+  animation: scanlinesMove 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanlinesMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+/* Glitch effect for cyberpunk feel */
+.glitch {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 79, 216, 0.03);
+  opacity: 0;
+  animation: glitchEffect 8s infinite;
+}
+
+@keyframes glitchEffect {
+  0%, 97%, 100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  98% {
+    opacity: 0.2;
+    transform: translateX(-5px);
+    background: rgba(255, 79, 216, 0.1);
+  }
+  99% {
+    opacity: 0.1;
+    transform: translateX(5px);
+    background: rgba(0, 242, 255, 0.1);
+  }
+}
+
+/* ==========================================================================
+   LOGOUT BUTTON
+   ========================================================================== */
+
+.logout-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #ff4fd8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: 100; /* Above most content but below modals */
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Tablet and mobile adjustments */
+  
+  .game-main {
+    flex-direction: column; /* Stack vertically */
+    text-align: center;
+  }
+  
+  .game-cover {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+  }
+  
+  .download-buttons {
+    grid-template-columns: 1fr; /* Single column */
+  }
+  
+  .tabs {
+    flex-wrap: wrap; /* Allow tabs to wrap */
+  }
+  
+  /* Particle adjustments for mobile */
+  .binary-rain {
+    font-size: 11px; /* Smaller text */
+  }
+  
+  .hexagon {
+    width: 15px;
+    height: 13px;
+  }
+  
+  .scanlines {
+    background-size: 100% 6px; /* Wider scan lines */
+  }
+  
+  /* Search bar mobile adjustments */
+  #search {
+    padding: 10px 18px 10px 40px;
+    font-size: 14px;
+    border-radius: 20px;
+    
+    box-shadow: 
+      inset 0 1px 2px rgba(255, 255, 255, 0.1),
+      0 0 0 1px rgba(0, 242, 255, 0.4),
+      0 0 0 3px rgba(255, 79, 216, 0.2),
+      0 3px 10px rgba(0, 0, 0, 0.4);
+  }
+  
+  #search::before {
+    left: 12px;
+    font-size: 14px;
+  }
+  
+  #search:focus, #search:hover {
+    padding-left: 42px;
+  }
+}
+
+/* ==========================================================================
+   SERVICES & PRICING SECTIONS
+   ========================================================================== */
+
+.services-section, .pricing-section {
+  margin-top: 50px;
+  padding: 0 20px;
+}
+
+.services-container, .pricing-container {
+  background: rgba(18, 23, 42, 0.8);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 242, 255, 0.2);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: 25px;
+  text-align: center;
+  margin-bottom: 15px;
+  background: linear-gradient(45deg, #00f2ff, #ff4fd8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(0, 242, 255, 0.3);
+}
+
+.section-subtitle {
+  text-align: center;
+  font-size: 18px;
+  color: #a0a0c0;
+  margin-bottom: 30px;
+}
+
+.section-subtitle span {
+  color: #00f2ff;
+  font-weight: bold;
+}
+
+/* Services content styling */
+.services-content {
+  margin-top: 20px;
+}
+
+.service-description {
+  background: rgba(15, 20, 37, 0.6);
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  border-left: 4px solid #00f2ff; /* Accent border */
+  line-height: 1.6;
+}
+
+.service-description strong {
+  color: #00f2ff;
+}
+
+.cloud-games {
+  background: rgba(255, 79, 216, 0.1);
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 79, 216, 0.3);
+}
+
+.cloud-games h3 {
+  color: #ff4fd8;
+  margin-bottom: 15px;
+  font-size: 22px;
+}
+
+.features {
+  margin-top: 20px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.check-icon, .price-icon {
+  font-size: 18px;
+  min-width: 24px; /* Prevent icon from shrinking */
+}
+
+.check-icon {
+  color: #00ff9d; /* Green for checkmarks */
+}
+
+.price-icon {
+  color: #ffd700; /* Gold for price icons */
+}
+
+.requirements {
+  background: rgba(0, 242, 255, 0.1);
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid rgba(0, 242, 255, 0.3);
+}
+
+.requirements h3 {
+  color: #00f2ff;
+  margin-bottom: 20px;
+  font-size: 22px;
+  text-align: center;
+}
+
+.req-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.req-icon {
+  font-size: 20px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.req-item strong {
+  color: #00f2ff;
+}
+
+/* Pricing cards grid */
+.pricing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+  gap: 30px;
+  margin: 40px 0;
+}
+
+.price-card {
+  background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(255, 79, 216, 0.1));
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  border: 2px solid rgba(0, 242, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.price-card:hover {
+  transform: translateY(-10px); /* Lift on hover */
+  box-shadow: 0 20px 40px rgba(0, 242, 255, 0.2);
+  border-color: #00f2ff;
+}
+
+.price-icon {
+  font-size: 50px;
+  margin-bottom: 20px;
+}
+
+.price-card h3 {
+  font-size: 22px;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.price-amount {
+  font-size: 25px;
+  font-weight: bold;
+  color: #ff4fd8;
+  margin: 20px 0;
+  text-shadow: 0 0 10px rgba(255, 79, 216, 0.5);
+}
+
+.price-desc {
+  color: #a0a0c0;
+  font-size: 16px;
+}
+
+/* Payment methods section */
+.payment-section {
+  margin-top: 50px;
+  padding: 30px;
+  background: rgba(15, 20, 37, 0.6);
+  border-radius: 20px;
+  border: 2px solid rgba(0, 242, 255, 0.2);
+}
+
+.payment-title {
+  text-align: center;
+  font-size: 24px;
+  color: #ff4fd8;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin: 30px 0;
+}
+
+.payment-method {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 25px;
+  border-radius: 15px;
+  border: 1px solid rgba(0, 242, 255, 0.2);
+}
+
+.payment-method h4 {
+  color: #00f2ff;
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.payment-details {
+  text-align: center;
+}
+
+.account-number {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff4fd8;
+  margin: 15px 0;
+  letter-spacing: 2px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 79, 216, 0.3);
+}
+
+.account-name {
+  color: #a0a0c0;
+  font-size: 5px;
+  margin-top: 10px;
+}
+
+/* Important note styling */
+.important-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255, 71, 87, 0.1); /* Red tint */
+  border-radius: 15px;
+  border: 1px solid rgba(255, 71, 87, 0.3);
+}
+
+.note-icon {
+  font-size: 24px;
+  color: #ff4757; /* Red icon */
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.note-text {
+  color: #ffa502; /* Orange text */
+  line-height: 1.6;
+}
+
+.note-text strong {
+  color: #ff4757;
+}
+
+/* ==========================================================================
+   SIMPLE GAME DETAILS MODAL (ALTERNATIVE STYLE)
+   ========================================================================== */
+
+/* Alternative modal style - simpler version */
+.game-modal:not(.hidden) {
+  display: block;
+}
+
+.modal-content {
+  background: #12172a;
+  width: 90%;
+  max-width: 500px;
+  margin: 40px auto;
+  border-radius: 15px;
+  padding: 20px;
+  position: relative;
+  border: 2px solid #00f2ff;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff4fd8;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* Game info in simple modal */
+.game-cover {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.game-info h1 {
+  font-size: 22px;
+  color: white;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.game-description {
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* Buttons section for simple modal */
+.buttons-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+/* Base download button style */
+.download-btn {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  transition: 0.2s;
+  color: black;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Color variations for different button types */
+.btn-blue {
+  background: linear-gradient(45deg, #00f2ff, #0099ff);
+}
+
+.btn-orange {
+  background: linear-gradient(45deg, #ffd700, #ff6b00);
+}
+
+.btn-purple {
+  background: linear-gradient(45deg, #ff4fd8, #ff0066);
+}
+
+.btn-green {
+  background: linear-gradient(45deg, #00ff9d, #00cc7a);
+}
+
+.btn-gray {
+  background: linear-gradient(45deg, #888, #555);
+  color: white;
+}
+
+/* Game details in simple modal */
+.game-details {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.game-details div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-details div:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.detail-label {
+  color: #aaa;
+}
+
+.detail-value {
+  color: white;
+  font-weight: bold;
+}
+
+/* ==========================================================================
+   LOADING ANIMATION SCREEN
+   ========================================================================== */
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0b0f1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Above everything */
+  overflow: hidden;
+}
+
+.loading-content {
+  text-align: center;
+  z-index: 10000;
+}
+
+/* Animated gamepad container */
+.gamepad-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 40px;
+}
+
+.gamepad-icon {
+  font-size: 80px;
+  color: #00f2ff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  animation: gamepadFloat 3s ease-in-out infinite;
+}
+
+@keyframes gamepadFloat {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+    text-shadow: 0 0 20px #00f2ff, 0 0 40px #00f2ff;
+  }
+  50% {
+    transform: translate(-50%, -55%) rotate(5deg); /* Slight lift and rotation */
+    text-shadow: 0 0 30px #ff4fd8, 0 0 60px #ff4fd8;
+  }
+}
+
+/* Cyberpunk rings animation */
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring-1 {
+  width: 140px;
+  height: 140px;
+  border-top: 2px solid #00f2ff;
+  border-right: 2px solid transparent;
+  animation: spinClockwise 3s linear infinite;
+}
+
+.ring-2 {
+  width: 160px;
+  height: 160px;
+  border-bottom: 2px solid #ff4fd8;
+  border-left: 2px solid transparent;
+  animation: spinAntiClockwise 4s linear infinite;
+}
+
+.ring-3 {
+  width: 180px;
+  height: 180px;
+  border-top: 2px solid #9d4edd;
+  border-right: 2px solid #00f2ff;
+  animation: spinClockwise 5s linear infinite;
+}
+
+@keyframes spinClockwise {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes spinAntiClockwise {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+/* Floating particles around gamepad */
+.particle {
+  position: absolute;
+  background: #00f2ff;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.particle-1 {
+  width: 8px;
+  height: 8px;
+  top: 20%;
+  left: 20%;
+  animation: particleFloat 4s infinite ease-in-out;
+  background: #00f2ff;
+}
+
+.particle-2 {
+  width: 6px;
+  height: 6px;
+  top: 30%;
+  right: 25%;
+  animation: particleFloat 5s infinite ease-in-out 0.5s; /* Delayed start */
+  background: #ff4fd8;
+}
+
+.particle-3 {
+  width: 10px;
+  height: 10px;
+  bottom: 25%;
+  left: 15%;
+  animation: particleFloat 6s infinite ease-in-out 1s;
+  background: #9d4edd;
+}
+
+.particle-4 {
+  width: 7px;
+  height: 7px;
+  bottom: 35%;
+  right: 20%;
+  animation: particleFloat 5.5s infinite ease-in-out 1.5s;
+  background: #00f2ff;
+}
+
+.particle-5 {
+  width: 5px;
+  height: 5px;
+  top: 40%;
+  left: 40%;
+  animation: particleFloat 4.5s infinite ease-in-out 2s;
+  background: #ff4fd8;
+}
+
+.particle-6 {
+  width: 9px;
+  height: 9px;
+  bottom: 45%;
+  right: 30%;
+  animation: particleFloat 5s infinite ease-in-out 2.5s;
+  background: #9d4edd;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.8;
+    box-shadow: 0 0 10px currentColor;
+  }
+  25% {
+    transform: translate(20px, -20px);
+    opacity: 1;
+    box-shadow: 0 0 20px currentColor;
+  }
+  50% {
+    transform: translate(-15px, 15px);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(10px, -10px);
+    opacity: 0.9;
+  }
+}
+
+/* Responsive loading text */
+.loading-text {
+  font-size: clamp(1.5rem, 5vw, 2.2rem); /* Fluid font size */
+  background: linear-gradient(45deg, #00f2ff, #ff4fd8, #9d4edd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+  animation: textGlow 2s infinite alternate;
+  white-space: nowrap;
+  padding: 0 10px;
+}
+
+@keyframes textGlow {
+  0% {
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+  }
+  100% {
+    text-shadow: 0 0 20px rgba(255, 79, 216, 0.5), 
+                 0 0 30px rgba(157, 78, 221, 0.3);
+  }
+}
+
+.loading-subtext {
+  color: #a0a0c0;
+  font-size: 1rem;
+  margin-bottom: 30px;
+  animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Progress bar */
+.progress-container {
+  width: 300px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00f2ff, #ff4fd8);
+  border-radius: 4px;
+  animation: progressLoad 3s ease-in-out forwards;
+}
+
+@keyframes progressLoad {
+  0% { width: 0%; }
+  20% { width: 30%; }
+  40% { width: 50%; }
+  60% { width: 70%; }
+  80% { width: 85%; }
+  100% { width: 100%; }
+}
+
+/*===ADDITIONAL RESPONSIVE ADJUSTMENTS=== */
+
+@media (max-width: 600px) {
+  /* Mobile-specific modal adjustments */
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+    margin: 20px auto;
+  }
+  
+  .game-cover {
+    height: 150px;
+  }
+  
+  .download-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+/* Very small screen adjustments */
+@media (max-width: 480px) {
+  .services-section, .pricing-section {
+    padding: 0 15px;
+  }
+  
+  .feature, .req-item {
+    flex-direction: column; /* Stack vertically */
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .important-note {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  /* Loading screen mobile adjustments */
+  .loading-text {
+    font-size: 1.6rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .loading-subtext {
+    font-size: 0.9rem;
+  }
+  
+  .gamepad-container {
+    margin-bottom: 20px;
+  }
+}
+
+/* Firefox-specific scrollbar styling */
+#search {
+  scrollbar-width: thin;
+  scrollbar-color: #00f2ff transparent;
+}
+
+/* ===game resources button links spacing=== */
+.buttons-section {
+    gap: 2px !important;
+}
+
+.download-btn {
+    margin: 0 1px !important;
+    padding: 10px 5px !important;
+}
+
+/* Or if using grid */
+.download-buttons {
+    gap: 2px !important;
+}
+@media (max-width: 768px) {
+    .payment-method {
+        padding: 15px !important; /* Reduce padding */
+    }
+    
+    .account-number {
+        font-size: 16px !important;
+        letter-spacing: 0.5px !important;
+        padding: 6px 8px !important;
+    }
+    
+    .account-name {
+        font-size: 18px !important;
+    }
+    
+    .payment-title {
+        font-size: 22px !important; /* Smaller title */
+        margin-bottom: 15px !important;
+    }
+    
+    /* Make payment methods stack vertically */
+    .payment-methods {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+}
+
+/* ================= WHATSAPP FLOATING BUTTON ================= */
+.whatsapp-float {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(45deg, #25D366, #128C7E);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  animation: whatsappPulse 2s infinite;
+  border: 3px solid white;
+}
+
+/* WhatsApp icon */
+.whatsapp-float i {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Hover effect */
+.whatsapp-float:hover {
+  transform: scale(1.1) translateY(-5px);
+  box-shadow: 0 8px 30px rgba(37, 211, 102, 0.6);
+  background: linear-gradient(45deg, #1da851, #0d7d5f);
+}
+
+/* Active/click effect */
+.whatsapp-float:active {
+  transform: scale(0.95);
+}
+
+/* Pulsing animation */
+@keyframes whatsappPulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(37, 211, 102, 0.7), 
+                0 0 40px rgba(37, 211, 102, 0.4);
+  }
+}
+
+/* Optional: Add "Message us" text on hover */
+.whatsapp-float::after {
+  content: "Message us";
+  position: absolute;
+  right: 70px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.whatsapp-float:hover::after {
+  opacity: 1;
+  visibility: visible;
+  right: 75px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .whatsapp-float {
+    width: 55px;
+    height: 55px;
+    bottom: 25px;
+    right: 25px;
+    font-size: 26px;
+  }
+  
+  /* Hide text on mobile */
+  .whatsapp-float::after {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .whatsapp-float {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+    font-size: 24px;
+    border-width: 2px;
+  }
+}
