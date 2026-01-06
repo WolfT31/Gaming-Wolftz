@@ -1,7 +1,7 @@
 // ================= CONFIGURATION =================
 const PHP_CONFIG = {
     // REPLACE THESE WITH YOUR PHP HOSTING URLs
-    GAMES_API: 'https://your-php-host.com/get_games.php',
+    GAMES_API: 'https://get-games.wasmer.app/',
     VERIFY_PIN: 'https://verify-pin.wasmer.app',
     LOGOUT: 'https://your-php-host.com/logout.php'
 };
