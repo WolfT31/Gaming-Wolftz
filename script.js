@@ -2,7 +2,7 @@
 const PHP_CONFIG = {
     // YOUR PHP URLs FROM WASMER
     GAMES_API: 'https://get-games.wasmer.app',
-    VERIFY_PIN: 'https://verify-pin.wasmer.app/',
+    VERIFY_PIN: 'https://staticfile-wolft31.wasmer.app/',
     LOGOUT: 'https://logout-page.wasmer.app'
 };
 
