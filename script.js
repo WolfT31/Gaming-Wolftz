@@ -1,7 +1,7 @@
 // ================= CONFIGURATION =================
 const PHP_CONFIG = {
     GAMES_API: 'https://get-games.wasmer.app',
-    VERIFY_PIN: 'https://pin-wolft31.wasmer.app',
+    VERIFY_PIN: 'https://verify-pin.wasmer.app',
     LOGOUT: 'https://logout-page.wasmer.app'
 };
 
