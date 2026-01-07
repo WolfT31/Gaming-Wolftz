@@ -1,6 +1,6 @@
 // ================= CONFIGURATION =================
 const PHP_CONFIG = {
-    GAMES_API: 'https://get-games-wolftz.wasmer.app/index.php',
+    GAMES_API: 'https://get-games-wolftzz.wasmer.app/get_games.php',
     VERIFY_PIN: 'https://verify-pin-wolftz.wasmer.app',
     LOGOUT: 'https://logout-page.wasmer.app'
 };
@@ -74,23 +74,27 @@ function showError(message) {
 // ================= LOAD GAMES FROM PHP BACKEND =================
 async function loadGames() {
     try {
+        console.log('Loading games from:', PHP_CONFIG.GAMES_API);
+        
+        // SIMPLE FETCH - NO credentials needed
         const response = await fetch(PHP_CONFIG.GAMES_API, {
-            credentials: 'include'
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
         
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: Failed to load games`);
+        }
+        
         const result = await response.json();
+        console.log('Games result:', result);
         
         if (!result.success) {
-            if (result.error && result.error.includes('expired')) {
-                sessionStorage.removeItem('pinSession');
-                showPinModal();
-                alert('Session expired. Please enter PIN again.');
-            } else if (result.redirect) {
-                window.location.href = result.redirect;
-            } else {
-                throw new Error(result.error || 'Failed to load games');
-            }
-            return;
+            throw new Error(result.error || 'Failed to load games');
         }
         
         // Decrypt base64 encoded links
@@ -101,28 +105,16 @@ async function loadGames() {
             const linkFields = [
                 'keyLink', 'gameLink', 'yuzuLink', 'gamehubLink', 
                 'edenLink', 'citronLink', 'emulatorLink', 'graphicsLink',
-                'firmwareLink', 'videoLink', 'saveDataLink', 'driversLink',
-                'winlatorLink', 'cemuLink', 'obbLink'
+                'firmwareLink', 'videoLink'
             ];
             
             linkFields.forEach(field => {
                 if (decryptedGame[field] && decryptedGame[field] !== '#') {
                     try {
-                        // Decode base64
+                        // Simple one-time decode
                         decryptedGame[field] = atob(decryptedGame[field]);
-                        
-                        // Check if it's still base64 (nested encoding)
-                        if (decryptedGame[field].startsWith('http')) {
-                            // It's already a URL, good
-                        } else {
-                            // Try to decode again if it looks like base64
-                            const decoded = atob(decryptedGame[field]);
-                            if (decoded.startsWith('http')) {
-                                decryptedGame[field] = decoded;
-                            }
-                        }
                     } catch (e) {
-                        console.warn(`Failed to decrypt ${field} for ${game.name}:`, e);
+                        console.warn(`Failed to decrypt ${field}:`, e);
                         decryptedGame[field] = '#';
                     }
                 }
@@ -137,23 +129,15 @@ async function loadGames() {
         // Render games
         renderGames(games);
         
+        console.log('Games loaded successfully:', games.length);
         return games;
         
     } catch (error) {
         console.error('Error loading games:', error);
-        
-        // If not logged in, show PIN modal
-        if (error.message.includes('403') || error.message.includes('Access denied')) {
-            showPinModal();
-            alert('Please enter PIN to access games');
-        } else {
-            alert('Error loading games. Please try again.');
-        }
-        
+        alert('Error: ' + error.message);
         return [];
     }
 }
-
 // ================= GAME LIBRARY SYSTEM =================
 function renderGames(games) {
     const gamesContainer = document.querySelector('.games');
