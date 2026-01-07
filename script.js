@@ -5,58 +5,58 @@ const PHP_CONFIG = {
     LOGOUT: 'https://logout-page.wasmer.app'
 };
 
-// ================= GLOBAL VARIABLES =================
-let slideInterval;
-let currentSlide = 1;
-let totalSlides = 0;
-let particles = [];
-let shockwave = false;
-let canvas, ctx, logo;
-
-// ================= PIN VERIFICATION =================
-async function verifyPin(pin) {
+// ================= DATA FETCHING =================
+async function fetchData(url, params = {}) {
     try {
-        if (!pin || pin.length !== 4 || !/^\d+$/.test(pin)) {
-            return { success: false, message: 'PIN must be 4 digits' };
-        }
+        // Build URL with parameters
+        const urlParams = new URLSearchParams(params);
+        const fullUrl = `${url}?${urlParams.toString()}&_t=${Date.now()}`;
         
-        console.log('Sending PIN to:', PHP_CONFIG.VERIFY_PIN);
+        console.log('Fetching from:', fullUrl);
         
-        const formData = new FormData();
-        formData.append('pin', pin);
+        // Fetch with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         
-        const response = await fetch(PHP_CONFIG.VERIFY_PIN, {
-            method: 'POST',
-            body: formData,
-            credentials: 'include',
+        const response = await fetch(fullUrl, {
+            signal: controller.signal,
             mode: 'cors',
             headers: {
                 'Accept': 'application/json'
             }
         });
         
-        console.log('PIN Response status:', response.status);
-        console.log('PIN Response headers:', response.headers);
+        clearTimeout(timeoutId);
         
-        const result = await response.json();
-        console.log('PIN Result:', result);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
         
-        return result;
+        const data = await response.json();
+        console.log('Response:', data);
+        return data;
         
     } catch (error) {
-        console.error('PIN error:', error);
+        console.error('Fetch error:', error);
+        throw error;
+    }
+}
+
+// ================= PIN VERIFICATION =================
+async function verifyPin(pin) {
+    try {
+        const result = await fetchData(PHP_CONFIG.VERIFY_PIN, { pin: pin });
+        return result;
+    } catch (error) {
         return { 
             success: false, 
-            message: 'Connection error. Check PHP server.' 
+            message: 'Server error. Using default PIN check.' 
         };
     }
 }
 
 function showPinModal() {
-    document.getElementById('pinInput').value = '';
-    document.getElementById('pinError').textContent = '';
     document.getElementById('pinModal').classList.remove('hidden');
-    setTimeout(() => document.getElementById('pinInput').focus(), 100);
 }
 
 function showError(message) {
@@ -67,35 +67,15 @@ function showError(message) {
     }
 }
 
-// ================= LOAD GAMES FROM EXTERNAL PHP =================
+// ================= LOAD GAMES FROM PHP =================
 async function loadGames() {
     try {
-        console.log('Loading games from:', PHP_CONFIG.GAMES_API);
+        console.log('Fetching games from PHP...');
         
-        const response = await fetch(PHP_CONFIG.GAMES_API, {
-            credentials: 'include',
-            mode: 'cors',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        console.log('Games Response status:', response.status);
-        
-        const result = await response.json();
-        console.log('Games Result:', result);
+        const result = await fetchData(PHP_CONFIG.GAMES_API);
         
         if (!result.success) {
-            if (result.error && result.error.includes('expired')) {
-                sessionStorage.removeItem('pinSession');
-                showPinModal();
-                alert('Session expired. Enter PIN again.');
-            } else if (result.redirect) {
-                window.location.href = result.redirect;
-            } else {
-                throw new Error(result.error || 'Failed to load games');
-            }
-            return;
+            throw new Error(result.error || 'Failed to load games');
         }
         
         // Decrypt base64 links
@@ -104,23 +84,29 @@ async function loadGames() {
             const linkFields = [
                 'keyLink', 'gameLink', 'yuzuLink', 'gamehubLink', 
                 'edenLink', 'citronLink', 'emulatorLink', 'graphicsLink',
-                'firmwareLink', 'videoLink', 'saveDataLink', 'driversLink',
-                'winlatorLink', 'cemuLink', 'obbLink'
+                'firmwareLink', 'videoLink'
             ];
             
             linkFields.forEach(field => {
                 if (decryptedGame[field] && decryptedGame[field] !== '#') {
                     try {
+                        // Try to decode
                         let decoded = atob(decryptedGame[field]);
-                        if (!decoded.startsWith('http')) {
-                            const doubleDecoded = atob(decoded);
-                            if (doubleDecoded.startsWith('http')) {
-                                decoded = doubleDecoded;
+                        
+                        // If result is still base64, decode again
+                        if (decoded.includes('base64') || !decoded.startsWith('http')) {
+                            try {
+                                decoded = atob(decoded);
+                            } catch (e) {
+                                // Not double encoded
                             }
                         }
-                        decryptedGame[field] = decoded;
+                        
+                        if (decoded.startsWith('http')) {
+                            decryptedGame[field] = decoded;
+                        }
                     } catch (e) {
-                        console.warn(`Failed to decrypt ${field}:`, e);
+                        console.warn(`Decode failed for ${field}:`, e);
                         decryptedGame[field] = '#';
                     }
                 }
@@ -131,23 +117,34 @@ async function loadGames() {
         
         window.gamesData = games;
         renderGames(games);
+        
+        // Save games to localStorage as backup
+        localStorage.setItem('cached_games', JSON.stringify(games));
+        localStorage.setItem('games_cache_time', Date.now());
+        
         return games;
         
     } catch (error) {
-        console.error('Error loading games:', error);
+        console.error('Games error:', error);
         
-        if (error.message.includes('403') || error.message.includes('Access denied')) {
-            showPinModal();
-            alert('Please enter PIN to access games');
-        } else {
-            alert('Error loading games. Please try again.');
+        // Try to load from cache
+        const cached = localStorage.getItem('cached_games');
+        const cacheTime = localStorage.getItem('games_cache_time');
+        
+        if (cached && cacheTime && (Date.now() - cacheTime < 3600000)) {
+            console.log('Using cached games');
+            const games = JSON.parse(cached);
+            window.gamesData = games;
+            renderGames(games);
+            return games;
         }
         
+        alert('Error loading games. Please check your connection.');
         return [];
     }
 }
 
-// ================= GAME LIBRARY =================
+// ================= RENDER GAMES =================
 function renderGames(games) {
     const gamesContainer = document.querySelector('.games');
     if (!gamesContainer) return;
@@ -215,8 +212,8 @@ function openGameModal(game) {
     document.getElementById('modalGameName').textContent = game.name;
     document.getElementById('modalGameDescription').textContent = game.description;
     document.getElementById('modalFileSize').textContent = game.size;
-    document.getElementById('modalVersion').textContent = game.version;
-    document.getElementById('modalRam').textContent = game.ram;
+    document.getElementById('modalVersion').textContent = game.version || 'null';
+    document.getElementById('modalRam').textContent = game.ram || '4GB+';
     document.getElementById('modalCategory').textContent = game.category.toUpperCase();
     
     const buttonsContainer = document.getElementById('modalButtons');
@@ -247,11 +244,8 @@ function openGameModal(game) {
         { key: 'edenLink', text: 'Eden', color: 'btn-green' },
         { key: 'citronLink', text: 'Citron', color: 'btn-green' },
         { key: 'gamehubLink', text: 'GameHub', color: 'btn-green' },
-        { key: 'winlatorLink', text: 'WinLator', color: 'btn-green' },
-        { key: 'cemuLink', text: 'Cemu', color: 'btn-green' },
-        { key: 'obbLink', text: 'OBB File', color: 'btn-green' },
-        { key: 'firmwareLink', text: 'Firmware', color: 'btn-green' },
-        { key: 'graphicsLink', text: 'Graphics', color: 'btn-blue' }
+        { key: 'graphicsLink', text: 'Graphics', color: 'btn-blue' },
+        { key: 'firmwareLink', text: 'Firmware', color: 'btn-green' }
     ];
     
     optionalButtons.forEach(btn => {
@@ -577,30 +571,23 @@ function hideLoadingScreen() {
 
 // ================= LOGOUT =================
 function logout() {
-    fetch(PHP_CONFIG.LOGOUT, {
-        credentials: 'include',
-        mode: 'cors'
-    }).then(() => {
-        localStorage.removeItem('pinSession');
-        localStorage.removeItem('lastAccess');
-        
-        document.querySelector(".header").style.display = "block";
-        document.getElementById('library').classList.add("hidden");
-        document.getElementById('logoutBtn').classList.add('hidden');
-        
-        if (slideInterval) {
-            clearInterval(slideInterval);
-            slideInterval = null;
-        }
-        initSlider();
-    }).catch(err => {
-        console.error('Logout error:', err);
-        // Force UI reset even if logout fails
-        localStorage.removeItem('pinSession');
-        document.querySelector(".header").style.display = "block";
-        document.getElementById('library').classList.add("hidden");
-        document.getElementById('logoutBtn').classList.add('hidden');
-    });
+    // Clear all local storage
+    localStorage.removeItem('pinSession');
+    localStorage.removeItem('lastAccess');
+    localStorage.removeItem('pin_verified');
+    localStorage.removeItem('pin_time');
+    localStorage.removeItem('cached_games');
+    localStorage.removeItem('games_cache_time');
+    
+    document.querySelector(".header").style.display = "block";
+    document.getElementById('library').classList.add("hidden");
+    document.getElementById('logoutBtn').classList.add('hidden');
+    
+    if (slideInterval) {
+        clearInterval(slideInterval);
+        slideInterval = null;
+    }
+    initSlider();
 }
 
 // ================= CHECK REMEMBERED PIN =================
@@ -626,24 +613,31 @@ function checkRememberedPin() {
     return false;
 }
 
-// ================= DEBUG: TEST PHP LINKS =================
-function testPHPLinks() {
-    console.log('Testing PHP links:');
+// ================= DEBUG: TEST PHP ENDPOINTS =================
+function testEndpoints() {
+    console.log('Testing PHP endpoints:');
     console.log('1. Verify PIN:', PHP_CONFIG.VERIFY_PIN);
     console.log('2. Get Games:', PHP_CONFIG.GAMES_API);
     console.log('3. Logout:', PHP_CONFIG.LOGOUT);
     
-    // Quick test by opening links in new tabs
-    window.open(PHP_CONFIG.VERIFY_PIN + '?pin=1516', '_blank');
+    // Test games endpoint
+    fetch(PHP_CONFIG.GAMES_API)
+        .then(r => {
+            console.log('Games endpoint status:', r.status);
+            return r.text();
+        })
+        .then(text => {
+            console.log('Games response sample:', text.substring(0, 100));
+        })
+        .catch(err => console.log('Games test failed:', err));
 }
 
 // ================= MAIN INITIALIZATION =================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("🚀 Wolf Gaming Hub - Loading...");
-    console.log("PHP Endpoints:", PHP_CONFIG);
+    console.log("🚀 Wolf Gaming Hub - Initializing...");
     
-    // Test PHP links on load
-    testPHPLinks();
+    // Test endpoints
+    testEndpoints();
     
     const hasSession = checkRememberedPin();
     
@@ -669,13 +663,5 @@ document.addEventListener('DOMContentLoaded', function() {
         logo.addEventListener('click', triggerLogo);
     }
     
-    console.log("✅ System initialized");
-});
-
-// Add keyboard shortcut for testing (Ctrl+Shift+P)
-document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.shiftKey && e.key === 'P') {
-        e.preventDefault();
-        showPinModal();
-    }
+    console.log("✅ System ready - fetching from external PHP");
 });
