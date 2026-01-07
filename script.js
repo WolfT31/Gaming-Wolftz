@@ -1,6 +1,5 @@
 // ================= CONFIGURATION =================
 const PHP_CONFIG = {
-    // REPLACE THESE WITH YOUR PHP HOSTING URLs
     GAMES_API: 'https://get-games.wasmer.app',
     VERIFY_PIN: 'https://pin-wolft31.wasmer.app',
     LOGOUT: 'https://logout-page.wasmer.app'
@@ -21,21 +20,35 @@ async function verifyPin(pin) {
             return { success: false, message: 'PIN must be 4 digits' };
         }
         
+        console.log('Sending PIN to:', PHP_CONFIG.VERIFY_PIN);
+        
         const formData = new FormData();
         formData.append('pin', pin);
         
         const response = await fetch(PHP_CONFIG.VERIFY_PIN, {
             method: 'POST',
             body: formData,
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
         
-        if (!response.ok) throw new Error('Server error');
-        return await response.json();
+        console.log('PIN Response status:', response.status);
+        console.log('PIN Response headers:', response.headers);
+        
+        const result = await response.json();
+        console.log('PIN Result:', result);
+        
+        return result;
         
     } catch (error) {
         console.error('PIN error:', error);
-        return { success: false, message: 'Connection error' };
+        return { 
+            success: false, 
+            message: 'Connection error. Check PHP server.' 
+        };
     }
 }
 
@@ -57,11 +70,20 @@ function showError(message) {
 // ================= LOAD GAMES FROM EXTERNAL PHP =================
 async function loadGames() {
     try {
+        console.log('Loading games from:', PHP_CONFIG.GAMES_API);
+        
         const response = await fetch(PHP_CONFIG.GAMES_API, {
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
         
+        console.log('Games Response status:', response.status);
+        
         const result = await response.json();
+        console.log('Games Result:', result);
         
         if (!result.success) {
             if (result.error && result.error.includes('expired')) {
@@ -90,7 +112,6 @@ async function loadGames() {
                 if (decryptedGame[field] && decryptedGame[field] !== '#') {
                     try {
                         let decoded = atob(decryptedGame[field]);
-                        // Try double decode if needed
                         if (!decoded.startsWith('http')) {
                             const doubleDecoded = atob(decoded);
                             if (doubleDecoded.startsWith('http')) {
@@ -154,21 +175,13 @@ function searchGames() {
     const cards = document.querySelectorAll(".card");
     
     cards.forEach(card => {
-        if (card.innerText.toLowerCase().includes(input)) {
-            card.style.display = "block";
-        } else {
-            card.style.display = "none";
-        }
+        card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
     });
 }
 
 function filterGames(category) {
     document.querySelectorAll(".card").forEach(card => {
-        if (category === "all" || card.dataset.category === category) {
-            card.style.display = "block";
-        } else {
-            card.style.display = "none";
-        }
+        card.style.display = (category === "all" || card.dataset.category === category) ? "block" : "none";
     });
 }
 
@@ -209,7 +222,6 @@ function openGameModal(game) {
     const buttonsContainer = document.getElementById('modalButtons');
     buttonsContainer.innerHTML = '';
     
-    // VIDEO BUTTON
     if (game.videoLink && game.videoLink !== '#') {
         const videoBtn = document.createElement('button');
         videoBtn.className = 'download-btn btn-purple';
@@ -218,7 +230,6 @@ function openGameModal(game) {
         buttonsContainer.appendChild(videoBtn);
     }
     
-    // GAME BUTTON
     if (game.gameLink && game.gameLink !== '#') {
         const gameBtn = document.createElement('button');
         gameBtn.className = 'download-btn btn-orange';
@@ -227,19 +238,18 @@ function openGameModal(game) {
         buttonsContainer.appendChild(gameBtn);
     }
     
-    // OTHER BUTTONS
     const optionalButtons = [
-        { key: 'driversLink', text: ' Driver', color: 'btn-green' },
+        { key: 'driversLink', text: 'Driver', color: 'btn-green' },
         { key: 'saveDataLink', text: 'Save Data', color: 'btn-green' },
         { key: 'emulatorLink', text: 'Emulator', color: 'btn-gray' },
         { key: 'keyLink', text: 'KEY', color: 'btn-green' },
-        { key: 'yuzuLink', text: 'Yuzu Emulator', color: 'btn-green' },
-        { key: 'edenLink', text: 'Eden Emulator', color: 'btn-green' },
-        { key: 'citronLink', text: 'Citron Emulator', color: 'btn-green' },
-        { key: 'gamehubLink', text: 'GameHub Emulator', color: 'btn-green' },
-        { key: 'winlatorLink', text: 'WinLator Emulator', color: 'btn-green' },
-        { key: 'cemuLink', text: 'Cemu Emulator', color: 'btn-green' },
-        { key: 'obbLink', text: 'Download Obb', color: 'btn-green' },
+        { key: 'yuzuLink', text: 'Yuzu', color: 'btn-green' },
+        { key: 'edenLink', text: 'Eden', color: 'btn-green' },
+        { key: 'citronLink', text: 'Citron', color: 'btn-green' },
+        { key: 'gamehubLink', text: 'GameHub', color: 'btn-green' },
+        { key: 'winlatorLink', text: 'WinLator', color: 'btn-green' },
+        { key: 'cemuLink', text: 'Cemu', color: 'btn-green' },
+        { key: 'obbLink', text: 'OBB File', color: 'btn-green' },
         { key: 'firmwareLink', text: 'Firmware', color: 'btn-green' },
         { key: 'graphicsLink', text: 'Graphics', color: 'btn-blue' }
     ];
@@ -352,7 +362,6 @@ function initParticles() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         particles = [];
-        const count = Math.floor((canvas.width * canvas.height) / 14000);
         for (let i = 0; i < count; i++) {
             particles.push(new Particle());
         }
@@ -495,9 +504,7 @@ function setupPinHandler() {
     });
     
     pinInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            accessBtn.click();
-        }
+        if (e.key === 'Enter') accessBtn.click();
     });
     
     pinInput.addEventListener('input', function(e) {
@@ -559,7 +566,6 @@ function simulateLoading() {
 
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen');
-    
     loadingScreen.style.opacity = '0';
     loadingScreen.style.transition = 'opacity 0.5s ease';
     
@@ -572,31 +578,28 @@ function hideLoadingScreen() {
 // ================= LOGOUT =================
 function logout() {
     fetch(PHP_CONFIG.LOGOUT, {
-        credentials: 'include'
+        credentials: 'include',
+        mode: 'cors'
     }).then(() => {
         localStorage.removeItem('pinSession');
         localStorage.removeItem('lastAccess');
-        
-        const clonedSlider = document.getElementById('slider-clone');
-        if (clonedSlider) clonedSlider.remove();
-        
-        const originalSlider = document.querySelector('.slider');
-        if (originalSlider) {
-            originalSlider.style.display = 'block';
-            originalSlider.classList.remove('initialized');
-        }
         
         document.querySelector(".header").style.display = "block";
         document.getElementById('library').classList.add("hidden");
         document.getElementById('logoutBtn').classList.add('hidden');
         
-        setTimeout(() => {
-            if (slideInterval) {
-                clearInterval(slideInterval);
-                slideInterval = null;
-            }
-            initSlider();
-        }, 100);
+        if (slideInterval) {
+            clearInterval(slideInterval);
+            slideInterval = null;
+        }
+        initSlider();
+    }).catch(err => {
+        console.error('Logout error:', err);
+        // Force UI reset even if logout fails
+        localStorage.removeItem('pinSession');
+        document.querySelector(".header").style.display = "block";
+        document.getElementById('library').classList.add("hidden");
+        document.getElementById('logoutBtn').classList.add('hidden');
     });
 }
 
@@ -623,9 +626,24 @@ function checkRememberedPin() {
     return false;
 }
 
+// ================= DEBUG: TEST PHP LINKS =================
+function testPHPLinks() {
+    console.log('Testing PHP links:');
+    console.log('1. Verify PIN:', PHP_CONFIG.VERIFY_PIN);
+    console.log('2. Get Games:', PHP_CONFIG.GAMES_API);
+    console.log('3. Logout:', PHP_CONFIG.LOGOUT);
+    
+    // Quick test by opening links in new tabs
+    window.open(PHP_CONFIG.VERIFY_PIN + '?pin=1516', '_blank');
+}
+
 // ================= MAIN INITIALIZATION =================
 document.addEventListener('DOMContentLoaded', function() {
     console.log("🚀 Wolf Gaming Hub - Loading...");
+    console.log("PHP Endpoints:", PHP_CONFIG);
+    
+    // Test PHP links on load
+    testPHPLinks();
     
     const hasSession = checkRememberedPin();
     
@@ -651,5 +669,13 @@ document.addEventListener('DOMContentLoaded', function() {
         logo.addEventListener('click', triggerLogo);
     }
     
-    console.log("✅ System ready with external PHP backend");
+    console.log("✅ System initialized");
+});
+
+// Add keyboard shortcut for testing (Ctrl+Shift+P)
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        showPinModal();
+    }
 });
