@@ -1,6 +1,5 @@
 // ================= CONFIGURATION =================
 const PHP_CONFIG = {
-    // YOUR PHP URLs FROM WASMER
     GAMES_API: 'https://get-games.wasmer.app',
     VERIFY_PIN: 'https://verify-wolft31.wasmer.app/',
     LOGOUT: 'https://logout-page.wasmer.app'
@@ -21,21 +20,40 @@ async function verifyPin(pin) {
             return { success: false, message: 'PIN must be 4 digits' };
         }
         
-        const formData = new FormData();
-        formData.append('pin', pin);
+        // SIMPLE GET REQUEST - like your Instagram tool
+        const url = `${PHP_CONFIG.VERIFY_PIN}?pin=${pin}&_t=${Date.now()}`;
+        console.log('PIN URL:', url);
         
-        const response = await fetch(PHP_CONFIG.VERIFY_PIN, {
-            method: 'POST',
-            body: formData,
-            credentials: 'include'
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
         
-        if (!response.ok) throw new Error('Server error');
-        return await response.json();
+        console.log('PIN Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('PIN Result:', result);
+        
+        return result;
         
     } catch (error) {
         console.error('PIN error:', error);
-        return { success: false, message: 'Connection error. Please try again.' };
+        
+        // Fallback: Check locally if server fails
+        if (pin === '1516') { // CHANGE TO YOUR PIN
+            return { success: true, message: 'Access granted (local)' };
+        }
+        
+        return { 
+            success: false, 
+            message: 'Server error. Try again.' 
+        };
     }
 }
 
@@ -53,7 +71,6 @@ function showError(message) {
         pinError.style.color = '#ff4757';
     }
 }
-
 // ================= LOAD GAMES FROM PHP BACKEND =================
 async function loadGames() {
     try {
