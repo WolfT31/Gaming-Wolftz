@@ -1,62 +1,49 @@
 // ================= CONFIGURATION =================
 const PHP_CONFIG = {
+    // YOUR PHP URLs FROM WASMER
     GAMES_API: 'https://get-games.wasmer.app',
-    VERIFY_PIN: 'https://verify-pin.wasmer.app',
+    VERIFY_PIN: 'https://pin-wolft31.wasmer.app',
     LOGOUT: 'https://logout-page.wasmer.app'
 };
 
-// ================= DATA FETCHING =================
-async function fetchData(url, params = {}) {
-    try {
-        // Build URL with parameters
-        const urlParams = new URLSearchParams(params);
-        const fullUrl = `${url}?${urlParams.toString()}&_t=${Date.now()}`;
-        
-        console.log('Fetching from:', fullUrl);
-        
-        // Fetch with timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        const response = await fetch(fullUrl, {
-            signal: controller.signal,
-            mode: 'cors',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Response:', data);
-        return data;
-        
-    } catch (error) {
-        console.error('Fetch error:', error);
-        throw error;
-    }
-}
+// ================= GLOBAL VARIABLES =================
+let slideInterval;
+let currentSlide = 1;
+let totalSlides = 0;
+let particles = [];
+let shockwave = false;
+let canvas, ctx, logo;
 
 // ================= PIN VERIFICATION =================
 async function verifyPin(pin) {
     try {
-        const result = await fetchData(PHP_CONFIG.VERIFY_PIN, { pin: pin });
-        return result;
+        if (!pin || pin.length !== 4 || !/^\d+$/.test(pin)) {
+            return { success: false, message: 'PIN must be 4 digits' };
+        }
+        
+        const formData = new FormData();
+        formData.append('pin', pin);
+        
+        const response = await fetch(PHP_CONFIG.VERIFY_PIN, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error('Server error');
+        return await response.json();
+        
     } catch (error) {
-        return { 
-            success: false, 
-            message: 'Server error. Using default PIN check.' 
-        };
+        console.error('PIN error:', error);
+        return { success: false, message: 'Connection error. Please try again.' };
     }
 }
 
 function showPinModal() {
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinError').textContent = '';
     document.getElementById('pinModal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('pinInput').focus(), 100);
 }
 
 function showError(message) {
@@ -67,46 +54,58 @@ function showError(message) {
     }
 }
 
-// ================= LOAD GAMES FROM PHP =================
+// ================= LOAD GAMES FROM PHP BACKEND =================
 async function loadGames() {
     try {
-        console.log('Fetching games from PHP...');
+        const response = await fetch(PHP_CONFIG.GAMES_API, {
+            credentials: 'include'
+        });
         
-        const result = await fetchData(PHP_CONFIG.GAMES_API);
+        const result = await response.json();
         
         if (!result.success) {
-            throw new Error(result.error || 'Failed to load games');
+            if (result.error && result.error.includes('expired')) {
+                sessionStorage.removeItem('pinSession');
+                showPinModal();
+                alert('Session expired. Please enter PIN again.');
+            } else if (result.redirect) {
+                window.location.href = result.redirect;
+            } else {
+                throw new Error(result.error || 'Failed to load games');
+            }
+            return;
         }
         
-        // Decrypt base64 links
+        // Decrypt base64 encoded links
         const games = result.games.map(game => {
             const decryptedGame = { ...game };
+            
+            // List of link fields to decrypt
             const linkFields = [
                 'keyLink', 'gameLink', 'yuzuLink', 'gamehubLink', 
                 'edenLink', 'citronLink', 'emulatorLink', 'graphicsLink',
-                'firmwareLink', 'videoLink'
+                'firmwareLink', 'videoLink', 'saveDataLink', 'driversLink',
+                'winlatorLink', 'cemuLink', 'obbLink'
             ];
             
             linkFields.forEach(field => {
                 if (decryptedGame[field] && decryptedGame[field] !== '#') {
                     try {
-                        // Try to decode
-                        let decoded = atob(decryptedGame[field]);
+                        // Decode base64
+                        decryptedGame[field] = atob(decryptedGame[field]);
                         
-                        // If result is still base64, decode again
-                        if (decoded.includes('base64') || !decoded.startsWith('http')) {
-                            try {
-                                decoded = atob(decoded);
-                            } catch (e) {
-                                // Not double encoded
+                        // Check if it's still base64 (nested encoding)
+                        if (decryptedGame[field].startsWith('http')) {
+                            // It's already a URL, good
+                        } else {
+                            // Try to decode again if it looks like base64
+                            const decoded = atob(decryptedGame[field]);
+                            if (decoded.startsWith('http')) {
+                                decryptedGame[field] = decoded;
                             }
                         }
-                        
-                        if (decoded.startsWith('http')) {
-                            decryptedGame[field] = decoded;
-                        }
                     } catch (e) {
-                        console.warn(`Decode failed for ${field}:`, e);
+                        console.warn(`Failed to decrypt ${field} for ${game.name}:`, e);
                         decryptedGame[field] = '#';
                     }
                 }
@@ -115,36 +114,30 @@ async function loadGames() {
             return decryptedGame;
         });
         
+        // Store games globally
         window.gamesData = games;
-        renderGames(games);
         
-        // Save games to localStorage as backup
-        localStorage.setItem('cached_games', JSON.stringify(games));
-        localStorage.setItem('games_cache_time', Date.now());
+        // Render games
+        renderGames(games);
         
         return games;
         
     } catch (error) {
-        console.error('Games error:', error);
+        console.error('Error loading games:', error);
         
-        // Try to load from cache
-        const cached = localStorage.getItem('cached_games');
-        const cacheTime = localStorage.getItem('games_cache_time');
-        
-        if (cached && cacheTime && (Date.now() - cacheTime < 3600000)) {
-            console.log('Using cached games');
-            const games = JSON.parse(cached);
-            window.gamesData = games;
-            renderGames(games);
-            return games;
+        // If not logged in, show PIN modal
+        if (error.message.includes('403') || error.message.includes('Access denied')) {
+            showPinModal();
+            alert('Please enter PIN to access games');
+        } else {
+            alert('Error loading games. Please try again.');
         }
         
-        alert('Error loading games. Please check your connection.');
         return [];
     }
 }
 
-// ================= RENDER GAMES =================
+// ================= GAME LIBRARY SYSTEM =================
 function renderGames(games) {
     const gamesContainer = document.querySelector('.games');
     if (!gamesContainer) return;
@@ -172,28 +165,41 @@ function searchGames() {
     const cards = document.querySelectorAll(".card");
     
     cards.forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
+        if (card.innerText.toLowerCase().includes(input)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
     });
 }
 
 function filterGames(category) {
     document.querySelectorAll(".card").forEach(card => {
-        card.style.display = (category === "all" || card.dataset.category === category) ? "block" : "none";
+        if (category === "all" || card.dataset.category === category) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
     });
 }
 
-// ================= ENTER LIBRARY =================
+// ================= ENTER LIBRARY AFTER PIN =================
 async function handlePinAccess(pin) {
     const result = await verifyPin(pin);
     
     if (result.success) {
+        // Hide PIN modal
         document.getElementById('pinModal').classList.add('hidden');
+        
+        // Show library
         document.querySelector(".header").style.display = "none";
         document.getElementById('library').classList.remove("hidden");
         document.getElementById('logoutBtn').classList.remove('hidden');
         
+        // Load games from PHP
         await loadGames();
         
+        // Remember PIN if checkbox checked
         if (document.getElementById('rememberPin').checked) {
             localStorage.setItem('pinSession', 'active');
             localStorage.setItem('lastAccess', Date.now());
@@ -206,27 +212,37 @@ async function handlePinAccess(pin) {
     }
 }
 
-// ================= GAME MODAL =================
+// ================= GAME DETAILS MODAL =================
 function openGameModal(game) {
+    // Update modal content
     document.getElementById('modalGameImage').src = game.image;
     document.getElementById('modalGameName').textContent = game.name;
     document.getElementById('modalGameDescription').textContent = game.description;
     document.getElementById('modalFileSize').textContent = game.size;
-    document.getElementById('modalVersion').textContent = game.version || 'null';
-    document.getElementById('modalRam').textContent = game.ram || '4GB+';
+    document.getElementById('modalVersion').textContent = game.version;
+    document.getElementById('modalRam').textContent = game.ram;
     document.getElementById('modalCategory').textContent = game.category.toUpperCase();
     
+    // Clear and create buttons
     const buttonsContainer = document.getElementById('modalButtons');
     buttonsContainer.innerHTML = '';
     
+    // VIDEO BUTTON
     if (game.videoLink && game.videoLink !== '#') {
         const videoBtn = document.createElement('button');
         videoBtn.className = 'download-btn btn-purple';
         videoBtn.innerHTML = '🎬 TAZAMA MAELEKEZO 🎬';
-        videoBtn.onclick = () => window.open(game.videoLink, '_blank');
+        videoBtn.onclick = () => {
+            if (game.videoLink && game.videoLink !== '#') {
+                window.open(game.videoLink, '_blank');
+            } else {
+                alert(`Hakuna video ya ${game.name} inapatikana.`);
+            }
+        };
         buttonsContainer.appendChild(videoBtn);
     }
     
+    // GAME DATA BUTTON (Main download)
     if (game.gameLink && game.gameLink !== '#') {
         const gameBtn = document.createElement('button');
         gameBtn.className = 'download-btn btn-orange';
@@ -235,17 +251,21 @@ function openGameModal(game) {
         buttonsContainer.appendChild(gameBtn);
     }
     
+    // Optional buttons - check each link
     const optionalButtons = [
-        { key: 'driversLink', text: 'Driver', color: 'btn-green' },
+        { key: 'driversLink', text: ' Driver', color: 'btn-green' },
         { key: 'saveDataLink', text: 'Save Data', color: 'btn-green' },
         { key: 'emulatorLink', text: 'Emulator', color: 'btn-gray' },
         { key: 'keyLink', text: 'KEY', color: 'btn-green' },
-        { key: 'yuzuLink', text: 'Yuzu', color: 'btn-green' },
-        { key: 'edenLink', text: 'Eden', color: 'btn-green' },
-        { key: 'citronLink', text: 'Citron', color: 'btn-green' },
-        { key: 'gamehubLink', text: 'GameHub', color: 'btn-green' },
-        { key: 'graphicsLink', text: 'Graphics', color: 'btn-blue' },
-        { key: 'firmwareLink', text: 'Firmware', color: 'btn-green' }
+        { key: 'yuzuLink', text: 'Yuzu Emulator', color: 'btn-green' },
+        { key: 'edenLink', text: 'Eden Emulator', color: 'btn-green' },
+        { key: 'citronLink', text: 'Citron Emulator', color: 'btn-green' },
+        { key: 'gamehubLink', text: 'GameHub Emulator', color: 'btn-green' },
+        { key: 'winlatorLink', text: 'WinLator Emulator', color: 'btn-green' },
+        { key: 'cemuLink', text: 'Cemu Emulator', color: 'btn-green' },
+        { key: 'obbLink', text: 'Download Obb', color: 'btn-green' },
+        { key: 'firmwareLink', text: 'Firmware', color: 'btn-green' },
+        { key: 'graphicsLink', text: 'Graphics', color: 'btn-blue' }
     ];
     
     optionalButtons.forEach(btn => {
@@ -258,6 +278,7 @@ function openGameModal(game) {
         }
     });
     
+    // Show modal
     document.getElementById('gameModal').classList.remove('hidden');
 }
 
@@ -265,7 +286,7 @@ function closeGameModal() {
     document.getElementById('gameModal').classList.add('hidden');
 }
 
-// ================= SLIDER =================
+// ================= SLIDER SYSTEM =================
 function initSlider() {
     const slider = document.querySelector('.slider:not([style*="display: none"]):not(.initialized)');
     if (!slider) return;
@@ -277,12 +298,18 @@ function initSlider() {
     const slides = slidesContainer.querySelectorAll("img");
     totalSlides = slides.length;
 
-    if (slideInterval) clearInterval(slideInterval);
+    if (slideInterval) {
+        clearInterval(slideInterval);
+        slideInterval = null;
+    }
 
     const hasClones = slidesContainer.children.length > totalSlides;
     if (!hasClones && slides.length > 0) {
         const firstClone = slides[0].cloneNode(true);
         const lastClone = slides[slides.length - 1].cloneNode(true);
+        
+        firstClone.classList.add('slide-clone');
+        lastClone.classList.add('slide-clone');
         
         slidesContainer.appendChild(firstClone);
         slidesContainer.insertBefore(lastClone, slides[0]);
@@ -303,7 +330,7 @@ function initSlider() {
 
     slideInterval = setInterval(() => moveToSlide(currentSlide + 1), 4000);
 
-    slidesContainer.addEventListener("transitionend", function() {
+    slidesContainer.addEventListener("transitionend", function handleTransition() {
         if (currentSlide === 0) {
             slidesContainer.style.transition = "none";
             currentSlide = totalSlides;
@@ -322,21 +349,25 @@ function initSlider() {
     }
 
     if (nextBtn) {
-        nextBtn.addEventListener("click", () => {
+        const newNextBtn = nextBtn.cloneNode(true);
+        nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+        newNextBtn.addEventListener("click", () => {
             moveToSlide(currentSlide + 1);
             resetInterval();
         });
     }
 
     if (prevBtn) {
-        prevBtn.addEventListener("click", () => {
+        const newPrevBtn = prevBtn.cloneNode(true);
+        prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+        newPrevBtn.addEventListener("click", () => {
             moveToSlide(currentSlide - 1);
             resetInterval();
         });
     }
 }
 
-// ================= PARTICLES =================
+// ================= PARTICLES SYSTEM =================
 function initParticles() {
     canvas = document.getElementById("particles");
     if (!canvas) return;
@@ -356,6 +387,7 @@ function initParticles() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         particles = [];
+        const count = Math.floor((canvas.width * canvas.height) / 14000);
         for (let i = 0; i < count; i++) {
             particles.push(new Particle());
         }
@@ -427,7 +459,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// ================= LOGO EFFECT =================
+// ================= LOGO EFFECTS =================
 function triggerLogo() {
     const logo = document.getElementById('logo');
     if (!logo) return;
@@ -467,7 +499,7 @@ function triggerLogo() {
     }, 500);
 }
 
-// ================= PIN HANDLER =================
+// ================= ACCESS BUTTON HANDLER =================
 function setupPinHandler() {
     const accessBtn = document.getElementById('accessBtn');
     const pinInput = document.getElementById('pinInput');
@@ -482,6 +514,7 @@ function setupPinHandler() {
             return;
         }
         
+        // Show loading state
         const originalText = this.textContent;
         this.textContent = 'Verifying...';
         this.disabled = true;
@@ -493,14 +526,19 @@ function setupPinHandler() {
             pinInput.focus();
         }
         
+        // Restore button
         this.textContent = originalText;
         this.disabled = false;
     });
     
+    // Enter key support
     pinInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') accessBtn.click();
+        if (e.key === 'Enter') {
+            accessBtn.click();
+        }
     });
     
+    // Auto-numeric input
     pinInput.addEventListener('input', function(e) {
         this.value = this.value.replace(/\D/g, '');
     });
@@ -560,6 +598,7 @@ function simulateLoading() {
 
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen');
+    
     loadingScreen.style.opacity = '0';
     loadingScreen.style.transition = 'opacity 0.5s ease';
     
@@ -571,23 +610,39 @@ function hideLoadingScreen() {
 
 // ================= LOGOUT =================
 function logout() {
-    // Clear all local storage
-    localStorage.removeItem('pinSession');
-    localStorage.removeItem('lastAccess');
-    localStorage.removeItem('pin_verified');
-    localStorage.removeItem('pin_time');
-    localStorage.removeItem('cached_games');
-    localStorage.removeItem('games_cache_time');
-    
-    document.querySelector(".header").style.display = "block";
-    document.getElementById('library').classList.add("hidden");
-    document.getElementById('logoutBtn').classList.add('hidden');
-    
-    if (slideInterval) {
-        clearInterval(slideInterval);
-        slideInterval = null;
-    }
-    initSlider();
+    // Call PHP logout to destroy session
+    fetch(PHP_CONFIG.LOGOUT, {
+        credentials: 'include'
+    }).then(() => {
+        // Clear local storage
+        localStorage.removeItem('pinSession');
+        localStorage.removeItem('lastAccess');
+        
+        // Reset UI
+        const clonedSlider = document.getElementById('slider-clone');
+        if (clonedSlider) clonedSlider.remove();
+        
+        const originalSlider = document.querySelector('.slider');
+        if (originalSlider) {
+            originalSlider.style.display = 'block';
+            originalSlider.classList.remove('initialized');
+        }
+        
+        document.querySelector(".header").style.display = "block";
+        document.getElementById('library').classList.add("hidden");
+        document.getElementById('logoutBtn').classList.add('hidden');
+        
+        // Reset slider
+        setTimeout(() => {
+            if (typeof initSlider === 'function') {
+                if (slideInterval) {
+                    clearInterval(slideInterval);
+                    slideInterval = null;
+                }
+                initSlider();
+            }
+        }, 100);
+    });
 }
 
 // ================= CHECK REMEMBERED PIN =================
@@ -598,14 +653,18 @@ function checkRememberedPin() {
     if (pinSession === 'active' && lastAccess) {
         const hoursSinceLastAccess = (Date.now() - parseInt(lastAccess)) / (1000 * 60 * 60);
         
+        // Auto-login if within 24 hours
         if (hoursSinceLastAccess < 24) {
+            // Automatically enter library
             document.querySelector(".header").style.display = "none";
             document.getElementById('library').classList.remove("hidden");
             document.getElementById('logoutBtn').classList.remove('hidden');
             
+            // Load games
             loadGames();
             return true;
         } else {
+            // Session expired
             localStorage.removeItem('pinSession');
             localStorage.removeItem('lastAccess');
         }
@@ -613,38 +672,19 @@ function checkRememberedPin() {
     return false;
 }
 
-// ================= DEBUG: TEST PHP ENDPOINTS =================
-function testEndpoints() {
-    console.log('Testing PHP endpoints:');
-    console.log('1. Verify PIN:', PHP_CONFIG.VERIFY_PIN);
-    console.log('2. Get Games:', PHP_CONFIG.GAMES_API);
-    console.log('3. Logout:', PHP_CONFIG.LOGOUT);
-    
-    // Test games endpoint
-    fetch(PHP_CONFIG.GAMES_API)
-        .then(r => {
-            console.log('Games endpoint status:', r.status);
-            return r.text();
-        })
-        .then(text => {
-            console.log('Games response sample:', text.substring(0, 100));
-        })
-        .catch(err => console.log('Games test failed:', err));
-}
-
 // ================= MAIN INITIALIZATION =================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("🚀 Wolf Gaming Hub - Initializing...");
+    console.log("🚀 Wolf Gaming Hub - Loading...");
     
-    // Test endpoints
-    testEndpoints();
-    
+    // Check if user has remembered PIN session
     const hasSession = checkRememberedPin();
     
     if (!hasSession) {
+        // Show header if no session
         document.querySelector(".header").style.display = "block";
     }
     
+    // Modal close handlers
     document.getElementById('gameModal').addEventListener('click', function(e) {
         if (e.target === this) closeGameModal();
     });
@@ -653,15 +693,32 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape') closeGameModal();
     });
     
+    // Start loading animation
     initLoadingAnimation();
+    
+    // Initialize components
     initSlider();
     initParticles();
+    
+    // Setup PIN handler
     setupPinHandler();
     
+    // Setup logo click effect
     const logo = document.getElementById('logo');
     if (logo) {
         logo.addEventListener('click', triggerLogo);
     }
     
-    console.log("✅ System ready - fetching from external PHP");
+    console.log("✅ System ready with PHP backend security");
 });
+
+// ================= SHAKE ANIMATION =================
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+`;
+document.head.appendChild(style);
