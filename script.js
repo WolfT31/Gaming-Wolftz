@@ -1,6 +1,6 @@
 // ================= CONFIGURATION =================
 const PHP_CONFIG = {
-    GAMES_API: 'https://get-games-wolftx.wasmer.app/get_games.php',
+    GAMES_API: 'https://games-get.wasmer.app/',
     VERIFY_PIN: 'https://pin-get.wasmer.app/',
     LOGOUT: 'https://logout-page.wasmer.app'
 };
