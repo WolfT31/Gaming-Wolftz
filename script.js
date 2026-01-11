@@ -11,7 +11,7 @@ const API_CONFIG = {
   // Replace these with your actual deployed URLs
   BASE_URL: 'https://verify-pin-wolftz.wasmer.app', // Your Wasmer.io domain
   ENDPOINTS: {
-    VERIFY_PIN: 'https://verify-pin-wolftz.wasmer.app/verify_pin.php',
+    VERIFY_PIN: 'https://pin-get.wasmer.app/verify_pin.php',
     GET_GAMES: 'https://verify-pin-wolftz.wasmer.app/get_games.php',
     LOGOUT: 'https://verify-pin-wolftz.wasmer.app/logout.php'
   }
