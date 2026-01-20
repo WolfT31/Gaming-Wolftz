@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: wolf-gaming  # Change this to your site's name (e.g., "my-portfolio")
+    env: php
+    buildCommand: ""         # Leave empty for pure PHP projects
+    startCommand: "php -S 0.0.0.0:\${PORT}"
+    rootDirectory: ./
+    envVars:
+      - key: PHP_VERSION
+        value: "8.3"         # You can change to "8.2", "8.1", or "7.4" if needed

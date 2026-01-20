@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wolftz Gaming</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Add this for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<!-- ================= LOADING ANIMATION ================= -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-content">
+    <!-- Animated Gamepad Icon -->
+    <div class="gamepad-container">
+      <i class="fas fa-gamepad gamepad-icon"></i>
+      
+      <!-- Cyberpunk Rings -->
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+      
+      <!-- Floating Particles -->
+      <div class="particle particle-1"></div>
+      <div class="particle particle-2"></div>
+      <div class="particle particle-3"></div>
+      <div class="particle particle-4"></div>
+      <div class="particle particle-5"></div>
+      <div class="particle particle-6"></div>
+    </div>
+    
+    <!-- Loading Text -->
+    <h2 class="loading-text">WOLF GAMING HUB</h2>
+    <p class="loading-subtext">Loading Ultimate Gaming Store...</p>
+    
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+  </div>
+</div>
+
+<canvas id="particles"></canvas>
+
+<!-- PIN Protection Modal (hidden by default) -->
+<div id="pinModal" class="pin-modal hidden">
+  <div class="pin-container">
+    <h2>Enter PIN</h2>
+    <p>Enter the PIN code to access the games library</p>
+    
+    <div class="pin-input-container">
+      <input type="password" id="pinInput" maxlength="4" placeholder="Enter PIN" autocomplete="off">
+    </div>
+    
+    <button id="accessBtn" class="access-btn">SUBMIT</button>
+    
+    <div class="remember-pin">
+      <input type="checkbox" id="rememberPin">
+      <label for="rememberPin">Remember PIN on this device</label>
+    </div>
+    
+    <!-- CONTACT FOR PIN Button -->
+    <a href="https://api.whatsapp.com/send?phone=255747654905" target="_blank" class="contact-btn">
+      <i class="fab fa-whatsapp"></i> GET PIN
+    </a>
+    
+    <div id="pinError" class="pin-error"></div>
+    
+    <button onclick="document.getElementById('pinModal').classList.add('hidden')" class="back-btn">
+      ← BACK
+    </button>
+    
+    <p class="pin-hint">© ᴄᴏᴘʏʀɪɢʜᴛ 2026 ᴡᴏʟғᴛᴇᴀᴍ</p>
+  </div>
+</div>
+
+<header class="header">
+  <img src="https://i.postimg.cc/28HvtdZR/black1xbet.png" class="logo" id="logo">
+  <h1>WOLF <span>GAMING HUB</span></h1>
+  <p><strong>karibu</strong> katika ulimwengu wa <strong>gamers</strong></p>
+  <p><strong>Shuka</strong> Chini Soma Maelekezo,Nitafute <strong>WhatsApp</strong> kwa <strong>Msaada</strong> Zaidi</p>
+  
+  <!-- This button shows the PIN modal -->
+  <button onclick="showPinModal()"><strong>︎✨ ENTER GAMES LIBRARY︎</strong></button>
+  
+  <div class="slider">
+    <div class="slides">
+      <img src="https://i.postimg.cc/3NCSymx3/wp6133812-gta-v-desktop-wallpapers.jpg" alt="GTA V">
+      <img src="https://i.postimg.cc/CLFZRTrj/IMG-20251221-WA0044.jpg" alt="bus simulator">
+      <img src="https://i.postimg.cc/wvQpctWh/Picsart-25-12-17-01-10-48-846.jpg" alt="Tomb Raider">
+      <img src="https://i.postimg.cc/QdNZhxdj/3389027.jpg" alt="GOD OF WAR">
+      <img src="https://i.postimg.cc/cCft69D6/Picsart-25-12-17-16-26-41-888.jpg" alt="FAR CRY3">
+      <img src="https://i.postimg.cc/SxPNJz5b/efootball-5c-3840x2400.jpg" alt="PES 2026">
+      <img src="https://i.postimg.cc/zXt0HJkz/Picsart-25-12-17-01-24-30-348.jpg" alt="GOD OF WAR II">
+      <img src="https://i.postimg.cc/TwQRqBHm/723864.jpg" alt="WARFAME">
+      <img src="https://i.postimg.cc/hGd0zTCh/wp9342845-4k-gta-5-pc-wallpapers.jpg" alt="Gta bg">
+      <img src="https://i.postimg.cc/Y9dsHwh5/Picsart-25-12-22-01-18-43-112.jpg" alt="fc 26">
+      <img src="https://i.postimg.cc/0NVSrXdC/wp8762692-mortal-kombat-11-ultimate-wallpapers.jpg" alt="MORTAL COMBAT-11">
+      <img src="https://i.postimg.cc/xTbPcM8N/wp13629622-call-of-duty-modern-warfare-3-season-2-wallpapers.png" alt="COD MW3">
+      <img src="https://i.postimg.cc/wvTz09ZW/Picsart-25-12-17-23-11-59-195.jpg" alt="GTA VICE CITY">
+      <img src="https://i.postimg.cc/rFRn6vLj/40632.jpg" alt="UNCHATERED 4">
+      <img src="https://i.postimg.cc/1tsT3Hpq/Picsart-25-12-17-19-17-01-152.jpg" alt="WatchDogs2">
+      <img src="https://i.postimg.cc/j24jC8Vq/Picsart-25-12-17-22-55-11-735.jpg" alt="Euro Truck">
+      <img src="https://i.postimg.cc/T1L2f22G/wp12417971-blur-racing-wallpapers.jpg" alt="BLUR">
+      <img src="https://i.postimg.cc/Vs3HKstw/462514-3000x1688-desktop-hd-scorpion-mortal-kombat-wallpaper.jpg" alt="MORTAL COMBAT">
+      <img src="https://i.postimg.cc/RhJbSY2f/Picsart-25-12-17-23-43-31-792.jpg" alt="CALL OF DUTY">
+      <img src="https://i.postimg.cc/LXvgnsMs/Picsart-25-12-17-02-13-37-058.jpg" alt="GTA CLOUD">
+      <img src="https://i.postimg.cc/zvXkygsm/the-last-of-us-2-3840x2160-17336.jpg" alt="LAS OF US II">
+      <img src="https://i.postimg.cc/SKmYTby8/1252757.jpg" alt="RED DEAD REDEMPTION">
+      <img src="https://i.postimg.cc/MTTDLQWZ/Picsart-25-12-17-17-44-40-709.jpg" alt="GTA San Andreas">
+      <img src="https://i.postimg.cc/pVhSM6tx/Picsart-25-12-22-02-09-32-338.jpg" alt="fifa23">
+      <img src="https://i.postimg.cc/JnMk4Hgf/Picsart-25-12-17-23-51-18-129.jpg" alt="Last Of Us">
+      <img src="https://i.postimg.cc/mgmxg1Xw/wp12116675-resident-evil-4-remake-wallpapers.png" alt="resident">
+      <img src="https://i.postimg.cc/9fsLrfBN/Picsart-25-12-19-13-20-53-288.jpg" alt="WINDS MEET">
+      <img src="https://i.postimg.cc/7h7xrXD0/Picsart-25-12-17-19-09-45-319.jpg" alt="WatchDogs">
+      <img src="https://i.postimg.cc/J4q7jnYy/wp2976460-sniper-elite-wallpaper-hd.jpg" alt="sniperelite">
+      <img src="https://i.postimg.cc/MG33JxXg/Picsart-25-12-17-23-04-18-708.jpg" alt="uncharted_poster">
+      <img src="https://i.postimg.cc/BbbyKzFG/Picsart-25-12-19-13-40-39-609.jpg" alt="BRIGHT MEMORY">
+    </div>
+    <button class="prev">&#10094;</button>
+    <button class="next">&#10095;</button>
+  </div>
+  
+  <!-- ================= OUR SERVICES SECTION ================= -->
+  <section class="services-section">
+    <div class="services-container">
+      <h2 class="section-title">Our Services</h2>
+      <p class="section-subtitle"><span>Ulimwengu wa Gaming</span></p>
+      
+      <div class="services-content">
+        <p class="service-description">
+          Pata games zote za <strong>PS 2, 3, 4</strong>, na 5 ucheze kwenye simu yako. 
+          Games kali kama <strong>GTA V, FC26, FIFA 23, Call of Duty, God Of War</strong> na nyingine nyingi. 
+          Tumeweka na <strong>VIDEO ZA MAELEKEZO</strong> Kwenye Kila Game<strong> kwa Kiswahili.</strong>
+        </p>
+        
+        <div class="cloud-games">
+          <h3>Hacked Cloud Games</h3>
+          <p>Special kwa simu zenye uwezo mdogo.<br>
+          Cheza <strong>GTA V, Uncharted, The Last of Us,WatchDogs, Codm Mw3</strong> bila kukwama.</p>
+          
+          <div class="features">
+            <div class="feature">
+              <span>Hakuna kikomo cha muda.</span>
+            </div>
+            <div class="feature">
+              <span class="price-icon">🎮</span>
+              <span>Bei ya <strong>Clouds</strong> games ni <strong>TZS 2,000 (VIP)</strong> kwa masaa 24 au <strong>TZS 9,000 (SueperVIP) kwa muda wa siku 7</strong>.</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="requirements">
+          <h3>ZINGATIA VIGEZO HIVI</h3>
+          <div class="req-item">
+            <span><strong>Simu:</strong> ANDROID pekee (iPhone haifai ❌).</span>
+          </div>
+          <div class="req-item">
+            <span class="req-icon">⚙️</span>
+            <span><strong>RAM:</strong> ianzie <strong>4GB</strong>& 6GB+ itapendeza zaidi kupata smooth gameplay.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- ================= PRICING SECTION ================= -->
+  <section class="pricing-section">
+    <div class="pricing-container">
+      <h2 class="section-title">Gharama za Kujiunga</h2>
+      <h2 class="section-title">(games zote)</h2>
+      
+      
+      <div class="pricing-cards">
+        <div class="price-card">
+          <div class="price-icon">📱</div>
+          <h3>Kwa Simu (Android)</h3>
+          <div class="price-amount">TZS 5,000 /=</div>
+          <p class="price-desc">Access ya games zote</p>
+        </div>
+        
+        <div class="price-card">
+          <div class="price-icon">💻</div>
+          <h3>Kwa Computer (PC)</h3>
+          <div class="price-amount">TZS 5,000 /=</div>
+          <p class="price-desc">Access ya games zote</p>
+        </div>
+      </div>
+      
+      <div class="payment-section">
+        <h3 class="payment-title">LIPA HAPA</h3>
+        <p><strong>Tumia namba hizi kufanya malipo:</strong></p>
+        
+        <div class="payment-methods">
+          <div class="payment-method">
+            <h4>M-PESA</h4>
+            <div class="payment-details">
+              <div class="account-number">0747 654 905</div>
+              <div class="account-name">GASPER GEORGE</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="important-note">
+          <div class="note-text">
+            <strong>MUHIMU:</strong> Tuma Jina la Wakala, Screenshot, au ujumbe wa muamala 
+            baada ya kulipia ili uunganishwe haraka.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+</header>
+
+<!-- GAMES LIBRARY SECTION (Hidden by default) -->
+<section id="library" class="library hidden">
+  <input type="text" id="search" placeholder="Search games..." onkeyup="searchGames()">
+
+  <div class="tabs">
+    <button onclick="filterGames('all')">All</button>
+    <button onclick="filterGames('pc')">PC</button>
+    <button onclick="filterGames('android')">Android</button>
+    <button onclick="filterGames('cloud')">Cloud</button>
+  </div>
+
+  <div class="games">
+    <!-- Games will be loaded from PHP -->
+  </div>
+</section>
+
+<!-- Game Details Modal -->
+<div id="gameModal" class="game-modal hidden">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeGameModal()">×</button>
+    
+    <!-- Game Image -->
+    <img id="modalGameImage" src="" alt="Game" class="game-cover">
+    
+    <!-- Game Title -->
+    <div class="game-info">
+      <h1 id="modalGameName"></h1>
+      <p id="modalGameDescription" class="game-description"></p>
+    </div>
+    
+    <!-- BUTTONS SECTION -->
+    <div class="buttons-section" id="modalButtons">
+      <!-- Buttons will be added by JavaScript -->
+    </div>
+    
+    <!-- Game Details -->
+    <div class="game-details">
+      <div>
+        <span class="detail-label">Ukubwa wa Fail:</span>
+        <span id="modalFileSize" class="detail-value"></span>
+      </div>
+      <div>
+        <span class="detail-label">Version:</span>
+        <span id="modalVersion" class="detail-value"></span>
+      </div>
+      <div>
+        <span class="detail-label">RAM Required:</span>
+        <span id="modalRam" class="detail-value"></span>
+      </div>
+      <div>
+        <span class="detail-label">Category:</span>
+        <span id="modalCategory" class="detail-value"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Button -->
+<button id="logoutBtn" class="logout-btn hidden" onclick="logout()">← Go Home</button>
+
+<!-- WhatsApp Floating Button -->
+<a href="https://api.whatsapp.com/send?phone=255747654905" 
+   target="_blank" 
+   class="whatsapp-float"
+   title="Chat on WhatsApp">
+  <i class="fab fa-whatsapp"></i>
+</a>
+
+<!-- JavaScript Files -->
+<script src="script.js"></script>
+</body>
+</html>
